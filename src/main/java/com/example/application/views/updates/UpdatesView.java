@@ -1,14 +1,11 @@
 package com.example.application.views.updates;
 
-import com.example.application.data.entity.SamplePerson;
 import com.example.application.data.entity.SoftwareUpdate;
-import com.example.application.data.service.SamplePersonService;
 import com.example.application.data.service.SoftwareUpdateService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -22,7 +19,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -35,37 +31,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 @PageTitle("Updates")
-@Route(value = "updates/:samplePersonID?/:action?(edit)")
+@Route(value = "updates/:softwareUpdateID?/:action?(edit)")
 @RouteAlias(value = "")
 @Uses(Icon.class)
 public class UpdatesView extends Div implements BeforeEnterObserver {
 
-    private final String SAMPLEPERSON_ID = "samplePersonID";
-    private final String SAMPLEPERSON_EDIT_ROUTE_TEMPLATE = "updates/%s/edit";
+    private final String SOFTWARE_UPDATE_ID = "softwareUpdateID";
+    private final String SOFTWARE_UPDATE_EDIT_ROUTE_TEMPLATE = "updates/%s/edit";
 
     private Grid<SoftwareUpdate> grid = new Grid<>(SoftwareUpdate.class, false);
 
-    private TextField firstName;
-    private TextField lastName;
-    private TextField email;
-    private TextField phone;
-    private DatePicker dateOfBirth;
-    private TextField occupation;
-    private Checkbox important;
+    private TextField version;
+    private DatePicker releaseDate;
 
     private Button cancel = new Button("Cancel");
     private Button save = new Button("Save");
 
-    private BeanValidationBinder<SamplePerson> binder;
+    private BeanValidationBinder<SoftwareUpdate> binder;
 
-    private SamplePerson samplePerson;
+    private SoftwareUpdate softwareUpdate;
 
-    private final SamplePersonService samplePersonService;
     private final SoftwareUpdateService softwareUpdateService;
 
     @Autowired
-    public UpdatesView(SamplePersonService samplePersonService, SoftwareUpdateService softwareUpdateService) {
-        this.samplePersonService = samplePersonService;
+    public UpdatesView(SoftwareUpdateService softwareUpdateService) {
         this.softwareUpdateService = softwareUpdateService;
         addClassNames("updates-view");
 
@@ -89,7 +78,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(SAMPLEPERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(SOFTWARE_UPDATE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(UpdatesView.class);
@@ -97,7 +86,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(SamplePerson.class);
+        binder = new BeanValidationBinder<>(SoftwareUpdate.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
 
@@ -110,18 +99,18 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.samplePerson == null) {
-                    this.samplePerson = new SamplePerson();
+                if (this.softwareUpdate == null) {
+                    this.softwareUpdate = new SoftwareUpdate();
                 }
-                binder.writeBean(this.samplePerson);
+                binder.writeBean(this.softwareUpdate);
 
-                samplePersonService.update(this.samplePerson);
+                softwareUpdateService.update(this.softwareUpdate);
                 clearForm();
                 refreshGrid();
-                Notification.show("SamplePerson details stored.");
+                Notification.show("Software updates details stored.");
                 UI.getCurrent().navigate(UpdatesView.class);
             } catch (ValidationException validationException) {
-                Notification.show("An exception happened while trying to store the samplePerson details.");
+                Notification.show("An exception happened while trying to store the software updates details.");
             }
         });
 
@@ -129,14 +118,14 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<UUID> samplePersonId = event.getRouteParameters().get(SAMPLEPERSON_ID).map(UUID::fromString);
-        if (samplePersonId.isPresent()) {
-            Optional<SamplePerson> samplePersonFromBackend = samplePersonService.get(samplePersonId.get());
-            if (samplePersonFromBackend.isPresent()) {
-                populateForm(samplePersonFromBackend.get());
+        Optional<UUID> softwareUpdateId = event.getRouteParameters().get(SOFTWARE_UPDATE_ID).map(UUID::fromString);
+        if (softwareUpdateId.isPresent()) {
+            Optional<SoftwareUpdate> softwareUpdateFromBackend = softwareUpdateService.get(softwareUpdateId.get());
+            if (softwareUpdateFromBackend.isPresent()) {
+                populateForm(softwareUpdateFromBackend.get());
             } else {
                 Notification.show(
-                        String.format("The requested samplePerson was not found, ID = %s", samplePersonId.get()), 3000,
+                        String.format("The requested software upate was not found, ID = %s", softwareUpdateId.get()), 3000,
                         Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
@@ -155,14 +144,9 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        firstName = new TextField("First Name");
-        lastName = new TextField("Last Name");
-        email = new TextField("Email");
-        phone = new TextField("Phone");
-        dateOfBirth = new DatePicker("Date Of Birth");
-        occupation = new TextField("Occupation");
-        important = new Checkbox("Important");
-        Component[] fields = new Component[]{firstName, lastName, email, phone, dateOfBirth, occupation, important};
+        version = new TextField("Version");
+        releaseDate = new DatePicker("Release Date");
+        Component[] fields = new Component[]{version, releaseDate};
 
         formLayout.add(fields);
         editorDiv.add(formLayout);
@@ -196,9 +180,8 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(SamplePerson value) {
-        this.samplePerson = value;
-        binder.readBean(this.samplePerson);
-
+    private void populateForm(SoftwareUpdate value) {
+        this.softwareUpdate = value;
+        binder.readBean(this.softwareUpdate);
     }
 }
