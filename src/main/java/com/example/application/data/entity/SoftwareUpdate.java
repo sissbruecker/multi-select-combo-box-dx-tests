@@ -1,6 +1,8 @@
 package com.example.application.data.entity;
 
 
+import dev.hilla.Nonnull;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
@@ -13,7 +15,8 @@ public class SoftwareUpdate extends AbstractEntity {
     private String version;
     private LocalDate releaseDate;
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<TeslaModel> models;
+    @Nonnull
+    private Set<@Nonnull TeslaModel> models;
 
     public String getVersion() {
         return version;

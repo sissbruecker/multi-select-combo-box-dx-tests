@@ -11,6 +11,8 @@ import '@vaadin/grid/vaadin-grid-sort-column';
 import '@vaadin/horizontal-layout';
 import '@vaadin/icon';
 import '@vaadin/icons';
+import '@vaadin/multi-select-combo-box';
+import {MultiSelectComboBoxSelectedItemsChangedEvent} from "@vaadin/multi-select-combo-box";
 import '@vaadin/notification';
 import { Notification } from '@vaadin/notification';
 import '@vaadin/polymer-legacy-adapter';
@@ -21,11 +23,12 @@ import '@vaadin/vaadin-icons';
 import Sort from 'Frontend/generated/dev/hilla/mappedtypes/Sort';
 import Direction from 'Frontend/generated/org/springframework/data/domain/Sort/Direction';
 import {html, TemplateResult} from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { View } from '../view';
 import SoftwareUpdateModel from "Frontend/generated/com/example/application/data/entity/SoftwareUpdateModel";
-import {SoftwareUpdateEndpoint} from "Frontend/generated/endpoints";
+import {SoftwareUpdateEndpoint, TeslaModelEndpoint} from "Frontend/generated/endpoints";
 import SoftwareUpdate from "Frontend/generated/com/example/application/data/entity/SoftwareUpdate";
+import TeslaModel from "Frontend/generated/com/example/application/data/entity/TeslaModel";
 
 @customElement('updates-hilla-view')
 export class UpdatesHillaView extends View {
@@ -38,6 +41,11 @@ export class UpdatesHillaView extends View {
   private gridDataProvider = this.getGridData.bind(this);
 
   private binder = new Binder<SoftwareUpdate, SoftwareUpdateModel>(this, SoftwareUpdateModel);
+
+  @state()
+  private availableModels: TeslaModel[] = [];
+  @state()
+  private selectedModels: TeslaModel[] = [];
 
   render() {
     return html`
@@ -67,8 +75,15 @@ export class UpdatesHillaView extends View {
                 label="Release Date"
                 id="lastName"
                 ${field(this.binder.model.releaseDate)}
-              >
-              </vaadin-date-picker>
+              ></vaadin-date-picker>
+              <vaadin-multi-select-combo-box 
+                  label="Models" 
+                  .items="${this.availableModels}"
+                  .selectedItems="${this.selectedModels}"
+                  @selected-items-changed="${(e:MultiSelectComboBoxSelectedItemsChangedEvent<TeslaModel>) => this.selectedModels = e.detail.value}"
+                  item-id-path="id"
+                  item-label-path="name"
+              ></vaadin-multi-select-combo-box>
             </vaadin-form-layout>
           </div>
           <vaadin-horizontal-layout class="button-layout">
@@ -98,6 +113,7 @@ export class UpdatesHillaView extends View {
   async connectedCallback() {
     super.connectedCallback();
     this.gridSize = (await SoftwareUpdateEndpoint.count()) ?? 0;
+    this.availableModels = await TeslaModelEndpoint.listAll();
   }
 
   private async itemSelected(event: CustomEvent) {
@@ -106,16 +122,22 @@ export class UpdatesHillaView extends View {
 
     if (item) {
       const fromBackend = await SoftwareUpdateEndpoint.get(item.id!);
-      fromBackend ? this.binder.read(fromBackend) : this.refreshGrid();
+      fromBackend ? this.updateForm(fromBackend) : this.refreshGrid();
     } else {
       this.clearForm();
     }
   }
 
+  private updateForm(softwareUpdate: SoftwareUpdate) {
+    this.binder.read(softwareUpdate);
+    this.selectedModels = [...softwareUpdate.models];
+  }
+
   private async save() {
     try {
       const isNew = !this.binder.value.id;
-      await this.binder.submitTo(SoftwareUpdateEndpoint.update);
+      this.binder.value.models = this.selectedModels;
+      await SoftwareUpdateEndpoint.update(this.binder.value);
       if (isNew) {
         // We added a new item
         this.gridSize++;
@@ -138,6 +160,7 @@ export class UpdatesHillaView extends View {
 
   private clearForm() {
     this.binder.clear();
+    this.selectedModels = [];
   }
 
   private refreshGrid() {

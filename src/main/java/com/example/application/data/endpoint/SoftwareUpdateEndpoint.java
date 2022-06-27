@@ -1,6 +1,7 @@
 package com.example.application.data.endpoint;
 
 import com.example.application.data.entity.SoftwareUpdate;
+import com.example.application.data.entity.TeslaModel;
 import com.example.application.data.service.SoftwareUpdateService;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import dev.hilla.Endpoint;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Endpoint
