@@ -4,14 +4,10 @@ import com.example.application.data.entity.SoftwareUpdate;
 import com.example.application.data.entity.TeslaModel;
 import com.example.application.data.service.SoftwareUpdateService;
 import com.example.application.data.service.TeslaModelService;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -19,8 +15,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -47,19 +41,13 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
 
     private Grid<SoftwareUpdate> grid = new Grid<>(SoftwareUpdate.class, false);
 
-    private TextField version;
-    private DatePicker releaseDate;
-    private MultiSelectComboBox<TeslaModel> models;
-
     private Button cancel = new Button("Cancel");
     private Button save = new Button("Save");
 
-    private BeanValidationBinder<SoftwareUpdate> binder;
-
-    private SoftwareUpdate softwareUpdate;
-
     private final SoftwareUpdateService softwareUpdateService;
-    private TeslaModelService teslaModelService;
+    private final TeslaModelService teslaModelService;
+
+    private SoftwareUpdateForm form;
 
     @Autowired
     public UpdatesView(SoftwareUpdateService softwareUpdateService, TeslaModelService teslaModelService) {
@@ -90,33 +78,22 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
             if (event.getValue() != null) {
                 UI.getCurrent().navigate(String.format(SOFTWARE_UPDATE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
-                clearForm();
+                form.clear();
                 UI.getCurrent().navigate(UpdatesView.class);
             }
         });
 
-        // Configure Form
-        binder = new BeanValidationBinder<>(SoftwareUpdate.class);
-
-        // Bind fields. This is where you'd define e.g. validation rules
-        binder.forField(version).bind(SoftwareUpdate::getVersion, SoftwareUpdate::setVersion);
-        binder.forField(releaseDate).bind(SoftwareUpdate::getReleaseDate, SoftwareUpdate::setReleaseDate);
-        binder.forField(models).bind(SoftwareUpdate::getModels, SoftwareUpdate::setModels);
-
         cancel.addClickListener(e -> {
-            clearForm();
+            form.clear();
             refreshGrid();
         });
 
         save.addClickListener(e -> {
             try {
-                if (this.softwareUpdate == null) {
-                    this.softwareUpdate = new SoftwareUpdate();
-                }
-                binder.writeBean(this.softwareUpdate);
+                SoftwareUpdate softwareUpdate = form.write();
 
-                softwareUpdateService.update(this.softwareUpdate);
-                clearForm();
+                softwareUpdateService.update(softwareUpdate);
+                form.clear();
                 refreshGrid();
                 Notification.show("Software updates details stored.");
                 UI.getCurrent().navigate(UpdatesView.class);
@@ -133,7 +110,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         if (softwareUpdateId.isPresent()) {
             Optional<SoftwareUpdate> softwareUpdateFromBackend = softwareUpdateService.get(softwareUpdateId.get());
             if (softwareUpdateFromBackend.isPresent()) {
-                populateForm(softwareUpdateFromBackend.get());
+                form.edit(softwareUpdateFromBackend.get());
             } else {
                 Notification.show(
                         String.format("The requested software upate was not found, ID = %s", softwareUpdateId.get()), 3000,
@@ -154,17 +131,8 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
 
-        FormLayout formLayout = new FormLayout();
-        version = new TextField("Version");
-        releaseDate = new DatePicker("Release Date");
-        models = new MultiSelectComboBox<>("Models");
-        models.setItemLabelGenerator(TeslaModel::getName);
-        models.setItems(teslaModelService.listAll());
-
-        Component[] fields = new Component[]{version, releaseDate, models};
-
-        formLayout.add(fields);
-        editorDiv.add(formLayout);
+        form = new SoftwareUpdateForm(this.teslaModelService);
+        editorDiv.add(form);
         createButtonLayout(editorLayoutDiv);
 
         splitLayout.addToSecondary(editorLayoutDiv);
@@ -189,14 +157,5 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
     private void refreshGrid() {
         grid.select(null);
         grid.getLazyDataView().refreshAll();
-    }
-
-    private void clearForm() {
-        populateForm(null);
-    }
-
-    private void populateForm(SoftwareUpdate value) {
-        this.softwareUpdate = value;
-        binder.readBean(this.softwareUpdate);
     }
 }
