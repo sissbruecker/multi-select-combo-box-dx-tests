@@ -34,15 +34,15 @@ public class DataGenerator {
             teslaModelRepository.save(modelS);
 
             TeslaModel modelX = new TeslaModel();
-            modelS.setName("Model X");
+            modelX.setName("Model X");
             teslaModelRepository.save(modelX);
 
             TeslaModel model3 = new TeslaModel();
-            modelS.setName("Model 3");
+            model3.setName("Model 3");
             teslaModelRepository.save(model3);
 
             TeslaModel modelY = new TeslaModel();
-            modelS.setName("Model Y");
+            modelY.setName("Model Y");
             teslaModelRepository.save(modelY);
 
             ExampleDataGenerator<SoftwareUpdate> softwareUpdateGenerator = new ExampleDataGenerator<>(SoftwareUpdate.class, LocalDateTime.of(2022, 6, 27, 0, 0, 0));

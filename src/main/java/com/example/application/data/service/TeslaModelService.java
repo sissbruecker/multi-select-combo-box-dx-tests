@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,8 +32,8 @@ public class TeslaModelService {
         repository.deleteById(id);
     }
 
-    public Page<TeslaModel> list(Pageable pageable) {
-        return repository.findAll(pageable);
+    public List<TeslaModel> listAll() {
+        return repository.findAll();
     }
 
     public int count() {

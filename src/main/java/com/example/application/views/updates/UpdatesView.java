@@ -1,11 +1,14 @@
 package com.example.application.views.updates;
 
 import com.example.application.data.entity.SoftwareUpdate;
+import com.example.application.data.entity.TeslaModel;
 import com.example.application.data.service.SoftwareUpdateService;
+import com.example.application.data.service.TeslaModelService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -19,6 +22,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -27,6 +31,8 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -43,6 +49,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
 
     private TextField version;
     private DatePicker releaseDate;
+    private MultiSelectComboBox<TeslaModel> models;
 
     private Button cancel = new Button("Cancel");
     private Button save = new Button("Save");
@@ -52,10 +59,12 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
     private SoftwareUpdate softwareUpdate;
 
     private final SoftwareUpdateService softwareUpdateService;
+    private TeslaModelService teslaModelService;
 
     @Autowired
-    public UpdatesView(SoftwareUpdateService softwareUpdateService) {
+    public UpdatesView(SoftwareUpdateService softwareUpdateService, TeslaModelService teslaModelService) {
         this.softwareUpdateService = softwareUpdateService;
+        this.teslaModelService = teslaModelService;
         addClassNames("updates-view");
 
         // Create UI
@@ -69,6 +78,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         // Configure Grid
         grid.addColumn("version").setAutoWidth(true);
         grid.addColumn("releaseDate").setAutoWidth(true);
+        grid.addColumn(new TextRenderer<>(update -> update.getModels().stream().map(TeslaModel::getName).collect(Collectors.joining(", ")))).setHeader("Models").setAutoWidth(true);
 
         grid.setItems(query -> softwareUpdateService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
@@ -146,7 +156,11 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         FormLayout formLayout = new FormLayout();
         version = new TextField("Version");
         releaseDate = new DatePicker("Release Date");
-        Component[] fields = new Component[]{version, releaseDate};
+        models = new MultiSelectComboBox<>("Models");
+        models.setItemLabelGenerator(TeslaModel::getName);
+        models.setItems(teslaModelService.listAll());
+
+        Component[] fields = new Component[]{version, releaseDate, models};
 
         formLayout.add(fields);
         editorDiv.add(formLayout);

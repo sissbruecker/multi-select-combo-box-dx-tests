@@ -2,6 +2,7 @@ package com.example.application.data.entity;
 
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import java.time.LocalDate;
 import java.util.Set;
@@ -11,8 +12,8 @@ public class SoftwareUpdate extends AbstractEntity {
 
     private String version;
     private LocalDate releaseDate;
-    @ManyToMany
-    private Set<TeslaModel> countries;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<TeslaModel> models;
 
     public String getVersion() {
         return version;
@@ -30,11 +31,11 @@ public class SoftwareUpdate extends AbstractEntity {
         this.releaseDate = releaseDate;
     }
 
-    public Set<TeslaModel> getCountries() {
-        return countries;
+    public Set<TeslaModel> getModels() {
+        return models;
     }
 
-    public void setCountries(Set<TeslaModel> countries) {
-        this.countries = countries;
+    public void setModels(Set<TeslaModel> models) {
+        this.models = models;
     }
 }
