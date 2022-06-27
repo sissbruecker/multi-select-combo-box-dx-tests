@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
-@PageTitle("Updates")
+@PageTitle("Tesla Software Updates")
 @Route(value = "updates/:softwareUpdateID?/:action?(edit)")
 @RouteAlias(value = "")
 @Uses(Icon.class)
