@@ -1,174 +1,130 @@
-import { Binder, field } from '@hilla/form';
-import { EndpointError } from '@hilla/frontend';
+import {EndpointError} from '@hilla/frontend';
 import '@vaadin/button';
-import '@vaadin/date-picker';
-import '@vaadin/date-time-picker';
-import '@vaadin/form-layout';
 import '@vaadin/grid';
-import { Grid, GridDataProviderCallback, GridDataProviderParams } from '@vaadin/grid';
-import { columnBodyRenderer } from '@vaadin/grid/lit';
+import {Grid, GridDataProviderCallback, GridDataProviderParams} from '@vaadin/grid';
+import {columnBodyRenderer} from '@vaadin/grid/lit';
 import '@vaadin/grid/vaadin-grid-sort-column';
 import '@vaadin/horizontal-layout';
 import '@vaadin/icon';
 import '@vaadin/icons';
-import '@vaadin/multi-select-combo-box';
-import {MultiSelectComboBoxSelectedItemsChangedEvent} from "@vaadin/multi-select-combo-box";
 import '@vaadin/notification';
-import { Notification } from '@vaadin/notification';
+import {Notification} from '@vaadin/notification';
 import '@vaadin/polymer-legacy-adapter';
 import '@vaadin/split-layout';
-import '@vaadin/text-field';
-import '@vaadin/upload';
 import '@vaadin/vaadin-icons';
 import Sort from 'Frontend/generated/dev/hilla/mappedtypes/Sort';
 import Direction from 'Frontend/generated/org/springframework/data/domain/Sort/Direction';
 import {html, TemplateResult} from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { View } from '../view';
-import SoftwareUpdateModel from "Frontend/generated/com/example/application/data/entity/SoftwareUpdateModel";
+import {customElement, property, query, state} from 'lit/decorators.js';
+import {View} from '../view';
 import {SoftwareUpdateEndpoint, TeslaModelEndpoint} from "Frontend/generated/endpoints";
 import SoftwareUpdate from "Frontend/generated/com/example/application/data/entity/SoftwareUpdate";
-import TeslaModel from "Frontend/generated/com/example/application/data/entity/TeslaModel";
+import "Frontend/views/updateshilla/software-update-form";
+import {SoftwareUpdateForm} from "Frontend/views/updateshilla/software-update-form";
 
 @customElement('updates-hilla-view')
 export class UpdatesHillaView extends View {
-  @query('#grid')
-  private grid!: Grid;
+    @query('#grid')
+    private grid!: Grid;
+    @query('software-update-form')
+    private form!: SoftwareUpdateForm;
 
-  @property({ type: Number })
-  private gridSize = 0;
+    @property({type: Number})
+    private gridSize = 0;
 
-  private gridDataProvider = this.getGridData.bind(this);
+    private gridDataProvider = this.getGridData.bind(this);
 
-  private binder = new Binder<SoftwareUpdate, SoftwareUpdateModel>(this, SoftwareUpdateModel);
-
-  @state()
-  private availableModels: TeslaModel[] = [];
-  @state()
-  private selectedModels: TeslaModel[] = [];
-
-  render() {
-    return html`
-      <vaadin-split-layout>
-        <div class="grid-wrapper">
-          <vaadin-grid
-            id="grid"
-            theme="no-border"
-            .size=${this.gridSize}
-            .dataProvider=${this.gridDataProvider}
-            @active-item-changed=${this.itemSelected}
-          >
-            <vaadin-grid-sort-column path="version" auto-width></vaadin-grid-sort-column>
-            <vaadin-grid-sort-column path="releaseDate" auto-width></vaadin-grid-sort-column>
-            <vaadin-grid-column auto-width header="Models" ${columnBodyRenderer(UpdatesHillaView.modelColumnRenderer)}></vaadin-grid-column>
-          </vaadin-grid>
-        </div>
-        <div class="editor-layout">
-          <div class="editor">
-            <vaadin-form-layout>
-              <vaadin-text-field
-                label="Version"
-                id="version"
-                ${field(this.binder.model.version)}
-              ></vaadin-text-field>
-              <vaadin-date-picker
-                label="Release Date"
-                id="lastName"
-                ${field(this.binder.model.releaseDate)}
-              ></vaadin-date-picker>
-              <vaadin-multi-select-combo-box 
-                  label="Models" 
-                  .items="${this.availableModels}"
-                  .selectedItems="${this.selectedModels}"
-                  @selected-items-changed="${(e:MultiSelectComboBoxSelectedItemsChangedEvent<TeslaModel>) => this.selectedModels = e.detail.value}"
-                  item-id-path="id"
-                  item-label-path="name"
-              ></vaadin-multi-select-combo-box>
-            </vaadin-form-layout>
-          </div>
-          <vaadin-horizontal-layout class="button-layout">
-            <vaadin-button theme="primary" @click=${this.save}>Save</vaadin-button>
-            <vaadin-button theme="tertiary" @click=${this.cancel}>Cancel</vaadin-button>
-          </vaadin-horizontal-layout>
-        </div>
-      </vaadin-split-layout>
-    `;
-  }
-
-  private async getGridData(
-    params: GridDataProviderParams<SoftwareUpdate>,
-    callback: GridDataProviderCallback<SoftwareUpdate | undefined>
-  ) {
-    const sort: Sort = {
-      orders: params.sortOrders.map((order) => ({
-        property: order.path,
-        direction: order.direction == 'asc' ? Direction.ASC : Direction.DESC,
-        ignoreCase: false,
-      })),
-    };
-    const data = await SoftwareUpdateEndpoint.list({ pageNumber: params.page, pageSize: params.pageSize, sort });
-    callback(data!);
-  }
-
-  async connectedCallback() {
-    super.connectedCallback();
-    this.gridSize = (await SoftwareUpdateEndpoint.count()) ?? 0;
-    this.availableModels = await TeslaModelEndpoint.listAll();
-  }
-
-  private async itemSelected(event: CustomEvent) {
-    const item: SoftwareUpdate = event.detail.value as SoftwareUpdate;
-    this.grid.selectedItems = item ? [item] : [];
-
-    if (item) {
-      const fromBackend = await SoftwareUpdateEndpoint.get(item.id!);
-      fromBackend ? this.updateForm(fromBackend) : this.refreshGrid();
-    } else {
-      this.clearForm();
+    render() {
+        return html`
+          <vaadin-split-layout>
+            <div class="grid-wrapper">
+              <vaadin-grid
+                  id="grid"
+                  theme="no-border"
+                  .size=${this.gridSize}
+                  .dataProvider=${this.gridDataProvider}
+                  @active-item-changed=${this.itemSelected}
+              >
+                <vaadin-grid-sort-column path="version" auto-width></vaadin-grid-sort-column>
+                <vaadin-grid-sort-column path="releaseDate" auto-width></vaadin-grid-sort-column>
+                <vaadin-grid-column auto-width header="Models"
+                                    ${columnBodyRenderer(UpdatesHillaView.modelColumnRenderer)}></vaadin-grid-column>
+              </vaadin-grid>
+            </div>
+            <div class="editor-layout">
+              <div class="editor">
+                <software-update-form></software-update-form>
+              </div>
+              <vaadin-horizontal-layout class="button-layout">
+                <vaadin-button theme="primary" @click=${this.save}>Save</vaadin-button>
+                <vaadin-button theme="tertiary" @click=${this.cancel}>Cancel</vaadin-button>
+              </vaadin-horizontal-layout>
+            </div>
+          </vaadin-split-layout>
+        `;
     }
-  }
 
-  private updateForm(softwareUpdate: SoftwareUpdate) {
-    this.binder.read(softwareUpdate);
-    this.selectedModels = [...softwareUpdate.models];
-  }
-
-  private async save() {
-    try {
-      const isNew = !this.binder.value.id;
-      this.binder.value.models = this.selectedModels;
-      await SoftwareUpdateEndpoint.update(this.binder.value);
-      if (isNew) {
-        // We added a new item
-        this.gridSize++;
-      }
-      this.clearForm();
-      this.refreshGrid();
-      Notification.show(`Software update details stored.`, { position: 'bottom-start' });
-    } catch (error: any) {
-      if (error instanceof EndpointError) {
-        Notification.show(`Server error. ${error.message}`, { theme: 'error', position: 'bottom-start' });
-      } else {
-        throw error;
-      }
+    private async getGridData(
+        params: GridDataProviderParams<SoftwareUpdate>,
+        callback: GridDataProviderCallback<SoftwareUpdate | undefined>
+    ) {
+        const sort: Sort = {
+            orders: params.sortOrders.map((order) => ({
+                property: order.path,
+                direction: order.direction == 'asc' ? Direction.ASC : Direction.DESC,
+                ignoreCase: false,
+            })),
+        };
+        const data = await SoftwareUpdateEndpoint.list({pageNumber: params.page, pageSize: params.pageSize, sort});
+        callback(data!);
     }
-  }
 
-  private cancel() {
-    this.grid.activeItem = undefined;
-  }
+    async connectedCallback() {
+        super.connectedCallback();
+        this.gridSize = (await SoftwareUpdateEndpoint.count()) ?? 0;
+    }
 
-  private clearForm() {
-    this.binder.clear();
-    this.selectedModels = [];
-  }
+    private async itemSelected(event: CustomEvent) {
+        const item: SoftwareUpdate = event.detail.value as SoftwareUpdate;
+        this.grid.selectedItems = item ? [item] : [];
 
-  private refreshGrid() {
-    this.grid.selectedItems = [];
-    this.grid.clearCache();
-  }
+        if (item) {
+            const fromBackend = await SoftwareUpdateEndpoint.get(item.id!);
+            fromBackend ? this.form.edit(fromBackend) : this.refreshGrid();
+        } else {
+            this.form.clear();
+        }
+    }
 
-  private static modelColumnRenderer(softwareUpdate: SoftwareUpdate): TemplateResult {
-      return html`${softwareUpdate.models?.map(model => model!.name).join(", ")}`;
-  }
+    private async save() {
+        try {
+            const softwareUpdate = await this.form.submit();
+
+            if (softwareUpdate) {
+                this.gridSize = (await SoftwareUpdateEndpoint.count()) ?? 0;
+                this.form.clear();
+                this.refreshGrid();
+                Notification.show(`Software update details stored.`, {position: 'bottom-start'});
+            }
+        } catch (error: any) {
+            if (error instanceof EndpointError) {
+                Notification.show(`Server error. ${error.message}`, {theme: 'error', position: 'bottom-start'});
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    private cancel() {
+        this.grid.activeItem = undefined;
+    }
+
+    private refreshGrid() {
+        this.grid.selectedItems = [];
+        this.grid.clearCache();
+    }
+
+    private static modelColumnRenderer(softwareUpdate: SoftwareUpdate): TemplateResult {
+        return html`${softwareUpdate.models?.map(model => model!.name).join(", ")}`;
+    }
 }
