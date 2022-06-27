@@ -12,7 +12,7 @@ public class SoftwareUpdate extends AbstractEntity {
     private String version;
     private LocalDate releaseDate;
     @ManyToMany
-    private Set<Country> countries;
+    private Set<TeslaModel> countries;
 
     public String getVersion() {
         return version;
@@ -30,11 +30,11 @@ public class SoftwareUpdate extends AbstractEntity {
         this.releaseDate = releaseDate;
     }
 
-    public Set<Country> getCountries() {
+    public Set<TeslaModel> getCountries() {
         return countries;
     }
 
-    public void setCountries(Set<Country> countries) {
+    public void setCountries(Set<TeslaModel> countries) {
         this.countries = countries;
     }
 }
