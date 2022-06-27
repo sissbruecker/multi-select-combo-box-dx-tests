@@ -99,8 +99,9 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         binder = new BeanValidationBinder<>(SoftwareUpdate.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
-
-        binder.bindInstanceFields(this);
+        binder.forField(version).bind(SoftwareUpdate::getVersion, SoftwareUpdate::setVersion);
+        binder.forField(releaseDate).bind(SoftwareUpdate::getReleaseDate, SoftwareUpdate::setReleaseDate);
+        binder.forField(models).bind(SoftwareUpdate::getModels, SoftwareUpdate::setModels);
 
         cancel.addClickListener(e -> {
             clearForm();
