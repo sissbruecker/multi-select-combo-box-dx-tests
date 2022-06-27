@@ -62,13 +62,19 @@ export class MainLayout extends Layout {
     return [
       {
         path: 'updates',
-        title: 'Tesla Software Updates',
+        title: 'Flow (Task)',
+        icon: 'la la-columns',
+      },
+
+      {
+        path: 'updates-solution',
+        title: 'Flow (Solution)',
         icon: 'la la-columns',
       },
 
       {
         path: 'updates-hilla',
-        title: 'Tesla Software Updates Hilla',
+        title: 'Hilla (Task)',
         icon: 'la la-columns',
       },
     ];

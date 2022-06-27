@@ -17,27 +17,22 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-
 @PageTitle("Tesla Software Updates")
-@Route(value = "updates/:softwareUpdateID?/:action?(edit)")
-@RouteAlias(value = "")
+@Route(value = "updates-solution/:softwareUpdateID?/:action?(edit)")
 @Uses(Icon.class)
-public class UpdatesView extends Div implements BeforeEnterObserver {
+public class SoftwareUpdatesViewSolution extends Div implements BeforeEnterObserver {
 
     private final String SOFTWARE_UPDATE_ID = "softwareUpdateID";
-    private final String SOFTWARE_UPDATE_EDIT_ROUTE_TEMPLATE = "updates/%s/edit";
+    private final String SOFTWARE_UPDATE_EDIT_ROUTE_TEMPLATE = "updates-solution/%s/edit";
 
     private Grid<SoftwareUpdate> grid = new Grid<>(SoftwareUpdate.class, false);
 
@@ -47,10 +42,10 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
     private final SoftwareUpdateService softwareUpdateService;
     private final TeslaModelService teslaModelService;
 
-    private SoftwareUpdateForm form;
+    private SoftwareUpdateFormSolution form;
 
     @Autowired
-    public UpdatesView(SoftwareUpdateService softwareUpdateService, TeslaModelService teslaModelService) {
+    public SoftwareUpdatesViewSolution(SoftwareUpdateService softwareUpdateService, TeslaModelService teslaModelService) {
         this.softwareUpdateService = softwareUpdateService;
         this.teslaModelService = teslaModelService;
         addClassNames("updates-view");
@@ -79,7 +74,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
                 UI.getCurrent().navigate(String.format(SOFTWARE_UPDATE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
                 form.clear();
-                UI.getCurrent().navigate(UpdatesView.class);
+                UI.getCurrent().navigate(SoftwareUpdatesViewSolution.class);
             }
         });
 
@@ -96,7 +91,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
                 form.clear();
                 refreshGrid();
                 Notification.show("Software updates details stored.");
-                UI.getCurrent().navigate(UpdatesView.class);
+                UI.getCurrent().navigate(SoftwareUpdatesViewSolution.class);
             } catch (ValidationException validationException) {
                 Notification.show("An exception happened while trying to store the software updates details.");
             }
@@ -118,7 +113,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
                 // when a row is selected but the data is no longer available,
                 // refresh grid
                 refreshGrid();
-                event.forwardTo(UpdatesView.class);
+                event.forwardTo(SoftwareUpdatesViewSolution.class);
             }
         }
     }
@@ -131,7 +126,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
 
-        form = new SoftwareUpdateForm(this.teslaModelService);
+        form = new SoftwareUpdateFormSolution(this.teslaModelService);
         editorDiv.add(form);
         createButtonLayout(editorLayoutDiv);
 
