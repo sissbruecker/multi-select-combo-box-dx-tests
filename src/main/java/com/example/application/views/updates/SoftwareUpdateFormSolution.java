@@ -30,9 +30,9 @@ public class SoftwareUpdateFormSolution extends FormLayout {
         binder.forField(releaseDate).bind(SoftwareUpdate::getReleaseDate, SoftwareUpdate::setReleaseDate);
 
         /* Task 1:
-         * Make SoftwareUpdate.models editable using a multi-select combo box.
-         * The user must select at least one model.
-         * You can use the TeslaModelService to get a list of all selectable models.
+         * Allow users to select which car models an update should be applied to, using a multi-select combo box.
+         * Users must select at least one model.
+         * You can use the TeslaModelService to get a list of all availabe models.
          */
         MultiSelectComboBox<TeslaModel> models = new MultiSelectComboBox<>("Models");
         models.setItemLabelGenerator(TeslaModel::getName);
@@ -42,7 +42,7 @@ public class SoftwareUpdateFormSolution extends FormLayout {
         binder.forField(models).asRequired().bind(SoftwareUpdate::getModels, SoftwareUpdate::setModels);
 
         /* Task 2:
-         * Display the currently selected models in a text box (for example a read-only text field) at the end of the form.
+         * Display the currently selected models in a text box (for example a read-only text area) at the end of the form.
          */
         TextArea selectedModels = new TextArea("Selected models");
         selectedModels.setReadOnly(true);
@@ -54,7 +54,7 @@ public class SoftwareUpdateFormSolution extends FormLayout {
 
         /* Task 3:
          * Add a button that selects all models.
-         * The button should only be active if no model is selected yet.
+         * The button should only be enabled if no model is selected yet.
          */
         Button selectAll = new Button("Select all", e -> {
             models.setValue(new HashSet<>(teslaModelService.listAll()));
