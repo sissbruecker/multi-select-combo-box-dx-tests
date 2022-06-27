@@ -1,11 +1,17 @@
 package com.example.application.data.generator;
 
-import com.example.application.data.entity.SamplePerson;
-import com.example.application.data.service.SamplePersonRepository;
+import com.example.application.data.entity.Country;
+import com.example.application.data.entity.SoftwareUpdate;
+import com.example.application.data.service.CountryRepository;
+import com.example.application.data.service.SoftwareUpdateRepository;
 import com.vaadin.exampledata.DataType;
 import com.vaadin.exampledata.ExampleDataGenerator;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -15,10 +21,10 @@ import org.springframework.context.annotation.Bean;
 public class DataGenerator {
 
     @Bean
-    public CommandLineRunner loadData(SamplePersonRepository samplePersonRepository) {
+    public CommandLineRunner loadData(CountryRepository countryRepository, SoftwareUpdateRepository softwareUpdateRepository) {
         return args -> {
             Logger logger = LoggerFactory.getLogger(getClass());
-            if (samplePersonRepository.count() != 0L) {
+            if (countryRepository.count() != 0L) {
                 logger.info("Using existing database");
                 return;
             }
@@ -26,17 +32,15 @@ public class DataGenerator {
 
             logger.info("Generating demo data");
 
-            logger.info("... generating 100 Sample Person entities...");
-            ExampleDataGenerator<SamplePerson> samplePersonRepositoryGenerator = new ExampleDataGenerator<>(
-                    SamplePerson.class, LocalDateTime.of(2022, 6, 27, 0, 0, 0));
-            samplePersonRepositoryGenerator.setData(SamplePerson::setFirstName, DataType.FIRST_NAME);
-            samplePersonRepositoryGenerator.setData(SamplePerson::setLastName, DataType.LAST_NAME);
-            samplePersonRepositoryGenerator.setData(SamplePerson::setEmail, DataType.EMAIL);
-            samplePersonRepositoryGenerator.setData(SamplePerson::setPhone, DataType.PHONE_NUMBER);
-            samplePersonRepositoryGenerator.setData(SamplePerson::setDateOfBirth, DataType.DATE_OF_BIRTH);
-            samplePersonRepositoryGenerator.setData(SamplePerson::setOccupation, DataType.OCCUPATION);
-            samplePersonRepositoryGenerator.setData(SamplePerson::setImportant, DataType.BOOLEAN_10_90);
-            samplePersonRepository.saveAll(samplePersonRepositoryGenerator.create(100, seed));
+            ExampleDataGenerator<Country> countryGenerator = new ExampleDataGenerator<>(
+                    Country.class, LocalDateTime.of(2022, 6, 27, 0, 0, 0));
+            countryGenerator.setData(Country::setName, DataType.COUNTRY);
+            countryRepository.saveAll(countryGenerator.create(10, seed));
+
+            ExampleDataGenerator<SoftwareUpdate> softwareUpdateGenerator = new ExampleDataGenerator<>(SoftwareUpdate.class, LocalDateTime.of(2022, 6, 27, 0, 0, 0));
+            softwareUpdateGenerator.setData(SoftwareUpdate::setVersion, DataType.EAN13);
+            softwareUpdateGenerator.setData(SoftwareUpdate::setReleaseDate, DataType.DATE_NEXT_1_YEAR);
+            softwareUpdateRepository.saveAll(softwareUpdateGenerator.create(10, seed));
 
             logger.info("Generated demo data");
         };

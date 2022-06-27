@@ -2,6 +2,9 @@
   "name": "no-name",
   "license": "UNLICENSED",
   "dependencies": {
+    "@adobe/lit-mobx": "2.0.0",
+    "@hilla/form": "1.1.0",
+    "@hilla/frontend": "1.1.0",
     "@polymer/iron-icon": "3.0.1",
     "@polymer/iron-iconset-svg": "3.0.1",
     "@polymer/iron-list": "3.1.0",
@@ -117,7 +120,9 @@
     "@vaadin/virtual-list": "23.1.1",
     "construct-style-sheets-polyfill": "3.1.0",
     "date-fns": "2.28.0",
-    "lit": "2.2.3"
+    "line-awesome": "1.3.0",
+    "lit": "2.2.3",
+    "mobx": "^6.3.5"
   },
   "devDependencies": {
     "async": "3.2.2",
@@ -258,10 +263,18 @@
     "date-fns": "$date-fns",
     "lit": "$lit",
     "chokidar": "$chokidar",
-    "@vaadin/lit-renderer": "$@vaadin/lit-renderer"
+    "@vaadin/lit-renderer": "$@vaadin/lit-renderer",
+    "@adobe/lit-mobx": "$@adobe/lit-mobx",
+    "@hilla/form": "$@hilla/form",
+    "@hilla/frontend": "$@hilla/frontend",
+    "line-awesome": "$line-awesome",
+    "mobx": "$mobx"
   },
   "vaadin": {
     "dependencies": {
+      "@adobe/lit-mobx": "2.0.0",
+      "@hilla/form": "1.1.0",
+      "@hilla/frontend": "1.1.0",
       "@polymer/iron-icon": "3.0.1",
       "@polymer/iron-iconset-svg": "3.0.1",
       "@polymer/iron-list": "3.1.0",
@@ -376,7 +389,9 @@
       "@vaadin/virtual-list": "23.1.1",
       "construct-style-sheets-polyfill": "3.1.0",
       "date-fns": "2.28.0",
-      "lit": "2.2.3"
+      "line-awesome": "1.3.0",
+      "lit": "2.2.3",
+      "mobx": "^6.3.5"
     },
     "devDependencies": {
       "async": "3.2.2",
@@ -401,6 +416,6 @@
       "workbox-precaching": "6.5.0",
       "workbox-webpack-plugin": "6.5.0"
     },
-    "hash": "8a4b77487dd7586cc631c05992b858c890d79c5ab4ba466473075fc2c4687c67"
+    "hash": "042dd1bf14794f1d994ecd22aaec3b176fc0cb217087ce62ed6784f3709dc240"
   }
 }

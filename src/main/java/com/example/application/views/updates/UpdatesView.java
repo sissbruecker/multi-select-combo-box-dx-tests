@@ -1,7 +1,9 @@
 package com.example.application.views.updates;
 
 import com.example.application.data.entity.SamplePerson;
+import com.example.application.data.entity.SoftwareUpdate;
 import com.example.application.data.service.SamplePersonService;
+import com.example.application.data.service.SoftwareUpdateService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -41,7 +43,7 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
     private final String SAMPLEPERSON_ID = "samplePersonID";
     private final String SAMPLEPERSON_EDIT_ROUTE_TEMPLATE = "updates/%s/edit";
 
-    private Grid<SamplePerson> grid = new Grid<>(SamplePerson.class, false);
+    private Grid<SoftwareUpdate> grid = new Grid<>(SoftwareUpdate.class, false);
 
     private TextField firstName;
     private TextField lastName;
@@ -59,10 +61,12 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
     private SamplePerson samplePerson;
 
     private final SamplePersonService samplePersonService;
+    private final SoftwareUpdateService softwareUpdateService;
 
     @Autowired
-    public UpdatesView(SamplePersonService samplePersonService) {
+    public UpdatesView(SamplePersonService samplePersonService, SoftwareUpdateService softwareUpdateService) {
         this.samplePersonService = samplePersonService;
+        this.softwareUpdateService = softwareUpdateService;
         addClassNames("updates-view");
 
         // Create UI
@@ -74,22 +78,10 @@ public class UpdatesView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("phone").setAutoWidth(true);
-        grid.addColumn("dateOfBirth").setAutoWidth(true);
-        grid.addColumn("occupation").setAutoWidth(true);
-        LitRenderer<SamplePerson> importantRenderer = LitRenderer.<SamplePerson>of(
-                "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
-                .withProperty("icon", important -> important.isImportant() ? "check" : "minus").withProperty("color",
-                        important -> important.isImportant()
-                                ? "var(--lumo-primary-text-color)"
-                                : "var(--lumo-disabled-text-color)");
+        grid.addColumn("version").setAutoWidth(true);
+        grid.addColumn("releaseDate").setAutoWidth(true);
 
-        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
-
-        grid.setItems(query -> samplePersonService.list(
+        grid.setItems(query -> softwareUpdateService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
