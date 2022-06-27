@@ -18,7 +18,7 @@ export const views: ViewRoute[] = [
     path: 'updates-hilla',
     component: 'updates-hilla-view',
     icon: 'la la-columns',
-    title: 'Updates Hilla',
+    title: 'Tesla Software Updates',
     action: async (_context, _command) => {
       await import('./views/updateshilla/updates-hilla-view');
       return;

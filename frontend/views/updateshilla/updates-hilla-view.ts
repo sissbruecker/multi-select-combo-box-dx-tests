@@ -18,14 +18,14 @@ import '@vaadin/split-layout';
 import '@vaadin/text-field';
 import '@vaadin/upload';
 import '@vaadin/vaadin-icons';
-import SamplePerson from 'Frontend/generated/com/example/application/data/entity/SamplePerson';
-import SamplePersonModel from 'Frontend/generated/com/example/application/data/entity/SamplePersonModel';
 import Sort from 'Frontend/generated/dev/hilla/mappedtypes/Sort';
 import Direction from 'Frontend/generated/org/springframework/data/domain/Sort/Direction';
-import * as SamplePersonEndpoint from 'Frontend/generated/SamplePersonEndpoint';
-import { html } from 'lit';
+import {html, TemplateResult} from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { View } from '../view';
+import SoftwareUpdateModel from "Frontend/generated/com/example/application/data/entity/SoftwareUpdateModel";
+import {SoftwareUpdateEndpoint} from "Frontend/generated/endpoints";
+import SoftwareUpdate from "Frontend/generated/com/example/application/data/entity/SoftwareUpdate";
 
 @customElement('updates-hilla-view')
 export class UpdatesHillaView extends View {
@@ -37,7 +37,7 @@ export class UpdatesHillaView extends View {
 
   private gridDataProvider = this.getGridData.bind(this);
 
-  private binder = new Binder<SamplePerson, SamplePersonModel>(this, SamplePersonModel);
+  private binder = new Binder<SoftwareUpdate, SoftwareUpdateModel>(this, SoftwareUpdateModel);
 
   render() {
     return html`
@@ -50,58 +50,26 @@ export class UpdatesHillaView extends View {
             .dataProvider=${this.gridDataProvider}
             @active-item-changed=${this.itemSelected}
           >
-            <vaadin-grid-sort-column path="firstName" auto-width></vaadin-grid-sort-column>
-            <vaadin-grid-sort-column path="lastName" auto-width></vaadin-grid-sort-column>
-            <vaadin-grid-sort-column path="email" auto-width></vaadin-grid-sort-column>
-            <vaadin-grid-sort-column path="phone" auto-width></vaadin-grid-sort-column>
-            <vaadin-grid-sort-column path="dateOfBirth" auto-width></vaadin-grid-sort-column>
-            <vaadin-grid-sort-column path="occupation" auto-width></vaadin-grid-sort-column>
-            <vaadin-grid-column
-              path="important"
-              auto-width
-              ${columnBodyRenderer<SamplePerson>((item) =>
-                item.important
-                  ? html`<vaadin-icon
-                      icon="vaadin:check"
-                      style="width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: var(--lumo-primary-text-color);"
-                    >
-                    </vaadin-icon>`
-                  : html`<vaadin-icon
-                      icon="vaadin:minus"
-                      style="width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: var(--lumo-disabled-text-color);"
-                    >
-                    </vaadin-icon>`
-              )}
-            ></vaadin-grid-column>
+            <vaadin-grid-sort-column path="version" auto-width></vaadin-grid-sort-column>
+            <vaadin-grid-sort-column path="releaseDate" auto-width></vaadin-grid-sort-column>
+            <vaadin-grid-column auto-width header="Models" ${columnBodyRenderer(UpdatesHillaView.modelColumnRenderer)}></vaadin-grid-column>
           </vaadin-grid>
         </div>
         <div class="editor-layout">
           <div class="editor">
-            <vaadin-form-layout
-              ><vaadin-text-field
-                label="First name"
-                id="firstName"
-                ${field(this.binder.model.firstName)}
-              ></vaadin-text-field
-              ><vaadin-text-field
-                label="Last name"
+            <vaadin-form-layout>
+              <vaadin-text-field
+                label="Version"
+                id="version"
+                ${field(this.binder.model.version)}
+              ></vaadin-text-field>
+              <vaadin-date-picker
+                label="Release Date"
                 id="lastName"
-                ${field(this.binder.model.lastName)}
-              ></vaadin-text-field
-              ><vaadin-text-field label="Email" id="email" ${field(this.binder.model.email)}></vaadin-text-field
-              ><vaadin-text-field label="Phone" id="phone" ${field(this.binder.model.phone)}></vaadin-text-field
-              ><vaadin-date-picker
-                label="Date of birth"
-                id="dateOfBirth"
-                ${field(this.binder.model.dateOfBirth)}
-              ></vaadin-date-picker
-              ><vaadin-text-field
-                label="Occupation"
-                id="occupation"
-                ${field(this.binder.model.occupation)}
-              ></vaadin-text-field
-              ><vaadin-checkbox id="important" ${field(this.binder.model.important)} label="Important"></vaadin-checkbox
-            ></vaadin-form-layout>
+                ${field(this.binder.model.releaseDate)}
+              >
+              </vaadin-date-picker>
+            </vaadin-form-layout>
           </div>
           <vaadin-horizontal-layout class="button-layout">
             <vaadin-button theme="primary" @click=${this.save}>Save</vaadin-button>
@@ -113,8 +81,8 @@ export class UpdatesHillaView extends View {
   }
 
   private async getGridData(
-    params: GridDataProviderParams<SamplePerson>,
-    callback: GridDataProviderCallback<SamplePerson | undefined>
+    params: GridDataProviderParams<SoftwareUpdate>,
+    callback: GridDataProviderCallback<SoftwareUpdate | undefined>
   ) {
     const sort: Sort = {
       orders: params.sortOrders.map((order) => ({
@@ -123,21 +91,21 @@ export class UpdatesHillaView extends View {
         ignoreCase: false,
       })),
     };
-    const data = await SamplePersonEndpoint.list({ pageNumber: params.page, pageSize: params.pageSize, sort });
-    callback(data);
+    const data = await SoftwareUpdateEndpoint.list({ pageNumber: params.page, pageSize: params.pageSize, sort });
+    callback(data!);
   }
 
   async connectedCallback() {
     super.connectedCallback();
-    this.gridSize = (await SamplePersonEndpoint.count()) ?? 0;
+    this.gridSize = (await SoftwareUpdateEndpoint.count()) ?? 0;
   }
 
   private async itemSelected(event: CustomEvent) {
-    const item: SamplePerson = event.detail.value as SamplePerson;
+    const item: SoftwareUpdate = event.detail.value as SoftwareUpdate;
     this.grid.selectedItems = item ? [item] : [];
 
     if (item) {
-      const fromBackend = await SamplePersonEndpoint.get(item.id!);
+      const fromBackend = await SoftwareUpdateEndpoint.get(item.id!);
       fromBackend ? this.binder.read(fromBackend) : this.refreshGrid();
     } else {
       this.clearForm();
@@ -147,14 +115,14 @@ export class UpdatesHillaView extends View {
   private async save() {
     try {
       const isNew = !this.binder.value.id;
-      await this.binder.submitTo(SamplePersonEndpoint.update);
+      await this.binder.submitTo(SoftwareUpdateEndpoint.update);
       if (isNew) {
         // We added a new item
         this.gridSize++;
       }
       this.clearForm();
       this.refreshGrid();
-      Notification.show(`SamplePerson details stored.`, { position: 'bottom-start' });
+      Notification.show(`Software update details stored.`, { position: 'bottom-start' });
     } catch (error: any) {
       if (error instanceof EndpointError) {
         Notification.show(`Server error. ${error.message}`, { theme: 'error', position: 'bottom-start' });
@@ -175,5 +143,9 @@ export class UpdatesHillaView extends View {
   private refreshGrid() {
     this.grid.selectedItems = [];
     this.grid.clearCache();
+  }
+
+  private static modelColumnRenderer(softwareUpdate: SoftwareUpdate): TemplateResult {
+      return html`${softwareUpdate.models?.map(model => model!.name).join(", ")}`;
   }
 }
