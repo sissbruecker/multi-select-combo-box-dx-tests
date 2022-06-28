@@ -32,7 +32,7 @@ public class SoftwareUpdateFormSolution extends FormLayout {
         /* Task 1:
          * Allow users to select which car models an update should be applied to, using a multi-select combo box.
          * Users must select at least one model.
-         * You can use the TeslaModelService to get a list of all availabe models.
+         * You can use the TeslaModelService to get a list of all available models.
          */
         MultiSelectComboBox<TeslaModel> models = new MultiSelectComboBox<>("Models");
         models.setItemLabelGenerator(TeslaModel::getName);
@@ -71,7 +71,7 @@ public class SoftwareUpdateFormSolution extends FormLayout {
         binder.readBean(this.editedSoftwareUpdate);
     }
 
-    public SoftwareUpdate write() throws ValidationException {
+    public SoftwareUpdate submit() throws ValidationException {
         binder.writeBean(this.editedSoftwareUpdate);
         return this.editedSoftwareUpdate;
     }

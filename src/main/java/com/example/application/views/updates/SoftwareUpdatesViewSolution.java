@@ -85,7 +85,7 @@ public class SoftwareUpdatesViewSolution extends Div implements BeforeEnterObser
 
         save.addClickListener(e -> {
             try {
-                SoftwareUpdate softwareUpdate = form.write();
+                SoftwareUpdate softwareUpdate = form.submit();
 
                 softwareUpdateService.update(softwareUpdate);
                 form.clear();
