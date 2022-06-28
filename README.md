@@ -22,3 +22,6 @@ update should be applied to.
 
 For the **Flow task**, open `src/main/java/com/example/application/views/updates/SoftwareUpdateForm.java`, and follow 
 the instructions there.
+
+For the **Hilla task**, open `frontend/views/updateshilla/software-update-form.ts`, and follow 
+the instructions there.

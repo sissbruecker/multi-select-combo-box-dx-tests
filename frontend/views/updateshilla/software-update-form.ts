@@ -10,6 +10,20 @@ import { SoftwareUpdateEndpoint, TeslaModelEndpoint } from 'Frontend/generated/e
 import { TextFieldValueChangedEvent } from '@vaadin/text-field';
 import { DatePickerValueChangedEvent } from '@vaadin/date-picker';
 
+/* Task 1:
+ * Allow users to select which car models an update should be applied to, using a multi-select combo box.
+ * You can use the availableModels property to get a list of all availabe models.
+ */
+
+/* Task 2:
+ * Display the currently selected models in a text box (for example a read-only text area) at the end of the form.
+ */
+
+/* Task 3:
+ * Add a button that selects all models.
+ * The button should only be enabled if no model is selected yet.
+ */
+
 @customElement('software-update-form')
 export class SoftwareUpdateForm extends LitElement {
   @state()
