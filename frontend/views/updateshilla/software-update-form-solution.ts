@@ -1,9 +1,11 @@
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import '@vaadin/button';
 import '@vaadin/date-picker';
 import '@vaadin/form-layout';
 import '@vaadin/multi-select-combo-box';
 import { MultiSelectComboBoxSelectedItemsChangedEvent } from '@vaadin/multi-select-combo-box';
+import '@vaadin/text-area';
 import '@vaadin/text-field';
 import SoftwareUpdate from 'Frontend/generated/com/example/application/data/entity/SoftwareUpdate';
 import { state } from 'lit/decorators';
@@ -19,6 +21,14 @@ export class SoftwareUpdateFormSolution extends LitElement {
 
   @state()
   private availableModels: TeslaModel[] = [];
+
+  get selectedModelsText(): string {
+    return this.editedSoftwareUpdate.models.map((model) => model.name).join(', ');
+  }
+
+  get isSelectAllModelsEnabled(): boolean {
+    return this.editedSoftwareUpdate.models.length === 0;
+  }
 
   async connectedCallback() {
     super.connectedCallback();
@@ -67,6 +77,8 @@ export class SoftwareUpdateFormSolution extends LitElement {
         ></vaadin-date-picker>
         <vaadin-multi-select-combo-box
           label="Models"
+          item-id-path="id"
+          item-label-path="name"
           .items="${this.availableModels}"
           .selectedItems="${this.editedSoftwareUpdate.models}"
           @selected-items-changed="${(e: MultiSelectComboBoxSelectedItemsChangedEvent<TeslaModel>) =>
@@ -74,9 +86,19 @@ export class SoftwareUpdateFormSolution extends LitElement {
               ...this.editedSoftwareUpdate,
               models: e.detail.value,
             })}"
-          item-id-path="id"
-          item-label-path="name"
         ></vaadin-multi-select-combo-box>
+        <vaadin-text-area label="Selected models" readonly .value="${this.selectedModelsText}"></vaadin-text-area>
+        <vaadin-button
+          label="Selected models"
+          .disabled="${!this.isSelectAllModelsEnabled}"
+          .value="${this.selectedModelsText}"
+          @click="${(e: Event) =>
+            (this.editedSoftwareUpdate = {
+              ...this.editedSoftwareUpdate,
+              models: [...this.availableModels],
+            })}"
+          >Select all
+        </vaadin-button>
       </vaadin-form-layout>
     `;
   }
