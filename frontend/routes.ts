@@ -24,6 +24,16 @@ export const views: ViewRoute[] = [
       return;
     },
   },
+  {
+    path: 'updates-hilla-solution',
+    component: 'updates-hilla-view-solution',
+    icon: 'la la-columns',
+    title: 'Tesla Software Updates',
+    action: async (_context, _command) => {
+      await import('./views/updateshilla/updates-hilla-view-solution');
+      return;
+    },
+  },
 ];
 export const routes: ViewRoute[] = [
   {

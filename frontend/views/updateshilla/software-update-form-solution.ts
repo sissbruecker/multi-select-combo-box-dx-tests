@@ -2,6 +2,8 @@ import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import '@vaadin/date-picker';
 import '@vaadin/form-layout';
+import '@vaadin/multi-select-combo-box';
+import { MultiSelectComboBoxSelectedItemsChangedEvent } from '@vaadin/multi-select-combo-box';
 import '@vaadin/text-field';
 import SoftwareUpdate from 'Frontend/generated/com/example/application/data/entity/SoftwareUpdate';
 import { state } from 'lit/decorators';
@@ -10,8 +12,8 @@ import { SoftwareUpdateEndpoint, TeslaModelEndpoint } from 'Frontend/generated/e
 import { TextFieldValueChangedEvent } from '@vaadin/text-field';
 import { DatePickerValueChangedEvent } from '@vaadin/date-picker';
 
-@customElement('software-update-form')
-export class SoftwareUpdateForm extends LitElement {
+@customElement('software-update-form-solution')
+export class SoftwareUpdateFormSolution extends LitElement {
   @state()
   private editedSoftwareUpdate!: SoftwareUpdate;
 
@@ -63,6 +65,18 @@ export class SoftwareUpdateForm extends LitElement {
               releaseDate: e.detail.value,
             })}"
         ></vaadin-date-picker>
+        <vaadin-multi-select-combo-box
+          label="Models"
+          .items="${this.availableModels}"
+          .selectedItems="${this.editedSoftwareUpdate.models}"
+          @selected-items-changed="${(e: MultiSelectComboBoxSelectedItemsChangedEvent<TeslaModel>) =>
+            (this.editedSoftwareUpdate = {
+              ...this.editedSoftwareUpdate,
+              models: e.detail.value,
+            })}"
+          item-id-path="id"
+          item-label-path="name"
+        ></vaadin-multi-select-combo-box>
       </vaadin-form-layout>
     `;
   }

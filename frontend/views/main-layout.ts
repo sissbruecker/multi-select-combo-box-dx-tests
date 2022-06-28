@@ -77,6 +77,12 @@ export class MainLayout extends Layout {
         title: 'Hilla (Task)',
         icon: 'la la-columns',
       },
+
+      {
+        path: 'updates-hilla-solution',
+        title: 'Hilla (Solution)',
+        icon: 'la la-columns',
+      },
     ];
   }
 }

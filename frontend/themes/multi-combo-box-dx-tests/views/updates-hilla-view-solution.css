@@ -1,0 +1,44 @@
+updates-hilla-view-solution {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+updates-hilla-view-solution vaadin-split-layout {
+  width: 100%;
+  height: 100%;
+}
+
+updates-hilla-view-solution vaadin-grid {
+  height: 100%;
+}
+
+updates-hilla-view-solution .editor-layout {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+}
+
+updates-hilla-view-solution .editor {
+  flex-grow: 1;
+  padding: var(--lumo-space-l);
+}
+
+updates-hilla-view-solution .editor vaadin-checkbox {
+  padding-top: var(--lumo-space-m);
+}
+
+updates-hilla-view-solution .button-layout {
+  width: 100%;
+  flex-wrap: wrap;
+  background-color: var(--lumo-contrast-5pct);
+  padding-bottom: var(--lumo-space-s);
+  padding-top: var(--lumo-space-s);
+  padding-left: var(--lumo-space-l);
+  padding-right: var(--lumo-space-l);
+  gap: var(--lumo-space-m);
+}
+
+updates-hilla-view-solution .grid-wrapper {
+  width: 100%;
+}
